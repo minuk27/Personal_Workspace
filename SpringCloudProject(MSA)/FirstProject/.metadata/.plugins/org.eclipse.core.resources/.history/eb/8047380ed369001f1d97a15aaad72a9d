@@ -1,0 +1,16 @@
+package egovframework.msa.minuk.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class ServiceAService {
+	private StringBuilder message = new StringBuilder();
+	
+	public String getServiceAMessage(String message) {
+		if (message != null && !message.trim().isEmpty()) {
+            this.message.append(message).append("\n"); // 메시지 추가
+        }
+        // 줄 바꿈을 포함하여 메시지 반환
+        return "This is Service B\n" + this.message.toString().trim(); 
+	}
+}

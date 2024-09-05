@@ -1,0 +1,15 @@
+package egovframework.msa.minuk.service;
+
+import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+public class ServiceAService {
+	private String message = "\n";
+	
+	public String getServiceAMessage() {
+		return "This is Service A " + message; 
+	}
+}

@@ -1,0 +1,17 @@
+server:
+ port: 8080
+
+spring:
+  application:
+    name: GatewayServer
+  cloud:
+    gateway:
+      routes:
+        - id: serviceA-router
+          uri: http://localhost:8081/
+          predicates:
+            - Path=/serviceA/**
+        - id: serviceB-router
+          uri: http://localhost:8082/
+          predicates:
+            - Path=/serviceB/**

@@ -1,0 +1,15 @@
+package egovframework.msa.minuk.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class ServiceAService {
+	private String message = "\n";
+	
+	public String getServiceAMessage(String message) {
+		if(message != null) {
+			this.message += message + "\n";
+		}
+		return "This is Service A\n" + message; 
+	}
+}

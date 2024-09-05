@@ -1,0 +1,5 @@
+package egovframework.msa.minuk.controller;
+
+public class ServiceBController {
+
+}
