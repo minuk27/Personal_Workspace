@@ -1,0 +1,63 @@
+package egovframework.msa.minuk.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import egovframework.msa.minuk.common.LoginStatus;
+import egovframework.msa.minuk.config.JwtTokenProvider;
+import egovframework.msa.minuk.domain.User;
+import egovframework.msa.minuk.domain.UserRepository;
+import egovframework.msa.minuk.userDto.JoinRequest;
+import egovframework.msa.minuk.userDto.LoginRequest;
+import lombok.RequiredArgsConstructor;
+
+
+@Service
+@RequiredArgsConstructor
+public class UserService {
+	
+	@Autowired
+	private UserRepository userRepository;
+	
+	private final JwtTokenProvider tokenProvider;
+	
+	public LoginStatus loginCheck(@RequestBody LoginRequest loginRequest) {
+		
+		String id = loginRequest.getUserID();
+		String password = loginRequest.getPassword();
+		
+		User user = userRepository.findByUserID(id);
+		
+		if(user == null) {
+			return LoginStatus.NO_USER;
+		}
+		
+		else if(!user.getPasswrod().equals(password)) {
+			return LoginStatus.WRONG_PASSWORD;
+		}
+		
+		return LoginStatus.SUCCESS;
+	}
+	
+	public String loginToken(@RequestBody LoginRequest loginRequest) {
+		return tokenProvider.tokenOffer(loginRequest);
+	}
+	
+	
+	public boolean joinCheck(@RequestBody JoinRequest joinRequest) {
+		boolean check = true;
+		String name = joinRequest.getName();
+		String id = joinRequest.getUserID();
+		String password = joinRequest.getPassword();
+		
+		if(userRepository.findByUserID(id) != null) {
+			check = false;
+			return check;
+		}
+		
+		User newUser = User.builder().name(name).id(id).password(password).build();
+		userRepository.save(newUser);
+		return check;
+	}
+}

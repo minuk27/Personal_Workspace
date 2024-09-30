@@ -1,0 +1,5 @@
+package egovframework.msa.minuk.filter;
+
+public class JwtAuthenticationFilter {
+
+}

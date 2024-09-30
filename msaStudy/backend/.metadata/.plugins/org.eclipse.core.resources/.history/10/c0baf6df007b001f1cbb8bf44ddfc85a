@@ -1,0 +1,5 @@
+package egovframework.msa.minuk.userDto;
+
+public class TokenResonse {
+
+}

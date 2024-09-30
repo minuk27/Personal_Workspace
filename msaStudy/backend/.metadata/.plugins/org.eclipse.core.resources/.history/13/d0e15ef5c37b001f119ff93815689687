@@ -1,0 +1,22 @@
+package egovframework.msa.minuk.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
+
+@Configuration
+@EnableWebFluxSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+        http.csrf().disable() // CSRF 비활성화 (필요에 따라 조정)
+            .authorizeExchange()
+            .pathMatchers("/login", "/signup").permitAll() // 로그인, 회원가입 요청 허용
+            .anyExchange().authenticated(); // 그 외의 요청은 인증 필요
+        
+        return http.build(); // SecurityWebFilterChain 객체 반환
+    }
+}

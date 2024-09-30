@@ -1,0 +1,36 @@
+server:
+  port: 0
+  
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/userdb
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  cloud:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3001"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+            allowedHeaders: 
+              - Authorization
+              - Content-Type
+    
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    service-url:
+      defaultZone: http://localhost:1000/eureka/
+      
+jwt:
+  secret: my-msa-project-jwt
+  accessTime: 1000 * 60
+  refreshTime: 1000 * 60 * 60

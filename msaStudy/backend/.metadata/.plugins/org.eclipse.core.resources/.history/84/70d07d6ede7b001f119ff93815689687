@@ -1,0 +1,41 @@
+server:
+  port: 1001
+  
+spring:
+  application:
+    name: gatewayServer
+  cloud:
+    gateway:
+      routes:
+        - id: userService-account-router
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/userService/**
+      #default-filters:
+        #- AddResponseHeader=Access-Control-Allow-Origin, *
+      globalcors:
+        cors-configurations:
+          "[/**]":
+            allow-credentials: true
+            allowed-origins: "http://localhost:3001"
+            allowed-headers:
+              - Authorization
+              - Authorization-refresh
+            allowed-methods:
+              - PUT
+              - GET
+              - POST
+              - DELETE
+              - PATCH
+    
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    service-url:
+      defaultZone: http://localhost:1000/eureka/
+      
+jwt:
+  secret: my-msa-project-jwt
+  accessTime: 1000 * 60
+  refreshTime: 1000 * 60 * 60

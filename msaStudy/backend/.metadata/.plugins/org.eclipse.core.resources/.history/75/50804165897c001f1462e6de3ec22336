@@ -1,0 +1,81 @@
+package egovframework.msa.minuk.filter;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ServerWebExchange;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import reactor.core.publisher.Mono;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Claims;
+
+import java.util.logging.Logger;
+
+import javax.crypto.SecretKey;
+
+public class LocalJwtAuthenticationFilter implements GlobalFilter {
+	
+	@Value("${jwt.secret}")
+	private String secreteKey;
+	private static final Logger logger = Logger.getLogger(PreFilter.class.getName());
+	
+	@Override
+	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain){
+		String path = exchange.getRequest().getURI().getPath();
+		if(path.equals("/Signin") || path.equals("/Signup")) {
+			exchange = addHeader(exchange);
+			return chain.filter(exchange);
+		}
+		
+		String token = extractToken(exchange);
+		
+		if(token == null || !validateToken(token)) {
+			exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+			System.out.println("실행");
+			return exchange.getResponse().setComplete();
+		}
+		
+		exchange = addHeader(exchange);
+		return chain.filter(exchange);
+	}
+	
+	private ServerWebExchange addHeader(ServerWebExchange exchange) {
+		exchange.getRequest().mutate()
+			.header("X-Custom-Header", "yourHeaderValue")
+			.build();
+		logger.info("헤더추가");
+		return exchange;
+	}
+	
+	//요청 헤더에서 토큰 분리
+	private String extractToken(ServerWebExchange exchange) {
+		String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
+		if(authHeader != null && authHeader.startsWith("Bearer")) {
+			return authHeader.substring(7); //'Bearer'라는 접두사를 제외한 7번째 인덱스 부터 추출하겠다는 의미
+		}
+		return null;
+	}
+	
+	//토큰 검증
+	private boolean validateToken(String token) {
+		try {
+			SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secreteKey));
+	        
+	        // JwtParserBuilder를 사용하여 JwtParser 생성
+	        Jws<Claims> claimsJws = Jwts.parserBuilder()
+	                .setSigningKey(key) // 서명 키 설정
+	                .build() // JwtParser 객체 생성
+	                .parseClaimsJws(token); // 토큰 파싱
+
+	        //log.info("payload :: " + claimsJws.getBody().toString());
+			
+			return true;
+		} catch(Exception e) {
+			return false;
+		}
+	}
+}

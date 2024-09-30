@@ -1,0 +1,13 @@
+package egovframework.msa.minuk.control;
+
+import org.springframework.web.bind.annotation.RestController;
+
+import egovframework.msa.minuk.service.MessageService;
+
+@RestController
+public class MessageControll {
+	
+	private MessageService messageService;
+	
+	
+}

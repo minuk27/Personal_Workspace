@@ -1,0 +1,53 @@
+server:
+  port: 1001
+  
+spring:
+  application:
+    name: gatewayServer
+  cloud:
+    gateway:
+      routes:
+        - id: userService-router
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/userService/Login
+          filters:
+            - StripPrefix=1
+            
+        - id: userService-router
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/userService/Join
+          filters:
+            - StripPrefix=1
+            
+        - id: userService-router
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/userService/**  # 모든 요청을 매칭
+            - Path=!/userService/Login  # /Login 제외
+            - Path=!/userService/Join  # /Join 제외
+          filters:
+            - StripPrefix=1
+            
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3001"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+            allowedHeaders: "*"
+            allowCredentials: true
+    
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    service-url:
+      defaultZone: http://localhost:1000/eureka/
+      
+jwt:
+  secret: my-msa-project-jwt

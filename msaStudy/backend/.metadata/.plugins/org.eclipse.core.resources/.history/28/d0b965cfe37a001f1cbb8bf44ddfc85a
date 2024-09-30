@@ -1,0 +1,41 @@
+package egovframework.msa.minuk.config;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.filter.OncePerRequestFilter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@Component
+public class TokenValidationFilter extends OncePerRequestFilter {
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
+        String token = request.getHeader("Authorization");
+
+        if (token != null && validateToken(token)) {
+            // 토큰이 유효하면 SecurityContext에 인증 정보 추가
+            // UserDetails 또는 Authentication 객체 설정
+            SecurityContextHolder.getContext().setAuthentication(getAuthentication(token));
+        } else {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
+            return;
+        }
+
+        chain.doFilter(request, response);
+    }
+
+    private boolean validateToken(String token) {
+        // JWT 검증 로직 구현
+        // 예: 서명 검증, 만료 시간 확인 등
+        return true; // 유효성 검증 결과 반환
+    }
+
+    private UsernamePasswordAuthenticationToken getAuthentication(String token) {
+        // 토큰에서 사용자 정보 추출
+        // 예: 사용자 ID로 UserDetailsService에서 사용자 정보를 조회
+        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    }

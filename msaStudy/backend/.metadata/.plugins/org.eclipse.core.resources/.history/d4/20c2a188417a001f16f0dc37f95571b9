@@ -1,0 +1,6 @@
+pring:
+  application:
+    name: minuk-dev
+  cloud:
+    config:
+      uri: http://localhost:1111

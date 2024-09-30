@@ -1,0 +1,40 @@
+package egovframework.msa.minuk.config;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.MalformedJwtException;
+
+public class JwtUtil {
+	private final String secretKey = "your_secret_key"; // 비밀키
+    private final long expirationTime = 3600000; // 1시간 (밀리초)
+
+    // JWT 토큰 검증 메서드
+    public boolean isValidToken(String token) {
+        try {
+            // JWT에서 Claims 추출
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            // 토큰의 만료 시간 확인
+            return !claims.getExpiration().before(new Date());
+        } catch (ExpiredJwtException e) {
+            // 토큰이 만료된 경우
+            System.out.println("Token is expired");
+        } catch (SignatureException e) {
+            // 서명이 유효하지 않은 경우
+            System.out.println("Invalid token signature");
+        } catch (MalformedJwtException e) {
+            // 잘못된 형식의 JWT인 경우
+            System.out.println("Malformed token");
+        } catch (Exception e) {
+            // 기타 예외 처리
+            System.out.println("Token validation failed");
+        }
+        return false; // 검증 실패
+    }
+}

@@ -1,0 +1,8 @@
+package egovframework.msa.minuk.config;
+
+import org.springframework.beans.factory.annotation.Value;
+
+public class TokenFilter {
+	@Value("{jwt.secret}")
+	private String secretKey;
+}

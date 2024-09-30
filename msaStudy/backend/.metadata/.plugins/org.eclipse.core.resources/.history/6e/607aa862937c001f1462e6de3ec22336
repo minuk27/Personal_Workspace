@@ -1,0 +1,101 @@
+package egovframework.msa.minuk.filter;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import reactor.core.publisher.Mono;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Claims;
+
+import java.util.logging.Logger;
+
+import javax.crypto.SecretKey;
+
+@Component
+public class LocalJwtAuthenticationFilter implements GlobalFilter {
+	
+	@Value("${jwt.secret}")
+	private String secretKey;
+	private static final Logger logger = Logger.getLogger(PreFilter.class.getName());
+	
+	@Override
+	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain){
+		logger.info(secretKey);
+		String path = exchange.getRequest().getURI().getPath();
+		if(path.equals("/userService/Signin") || path.equals("/userService/Signup")) {
+			exchange = addHeader(exchange);
+			return chain.filter(exchange);
+		}
+		
+		String token = extractToken(exchange);
+		logger.info(token);
+		
+		if(token == null || !validateToken(token)) {
+			
+			if(token == null)
+				logger.info("token null");
+			else
+				logger.info("token worng");
+			
+			exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+			return exchange.getResponse().setComplete();
+		}
+		
+		exchange = addHeader(exchange);
+		return chain.filter(exchange);
+	}
+	
+	private ServerWebExchange addHeader(ServerWebExchange exchange) {
+		exchange.getRequest().mutate()
+			.header("X-Custom-Header", "yourHeaderValue")
+			.build();
+		return exchange;
+	}
+	
+	//요청 헤더에서 토큰 분리
+	private String extractToken(ServerWebExchange exchange) {
+		String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
+		if(authHeader != null && authHeader.startsWith("Bearer")) {
+			return authHeader.substring(7); //'Bearer'라는 접두사를 제외한 7번째 인덱스 부터 추출하겠다는 의미
+		}
+		return null;
+	}
+	
+	//토큰 검증
+	private boolean validateToken(String token) {
+		logger.info("검사시작");
+		try {
+			//SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secreteKey));
+			//logger.info("key 값: " + key);
+	        
+			/*
+	        // JwtParserBuilder를 사용하여 JwtParser 생성
+	        Jws<Claims> claimsJws = Jwts.parserBuilder()
+	                .setSigningKey(key) // 서명 키 설정
+	                .build() // JwtParser 객체 생성
+	                .parseClaimsJws(token); // 토큰 파싱
+	                */
+			
+			logger.info("0");
+			SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretKey));
+			logger.info("1");
+
+            // JwtParserBuilder를 사용하여 JwtParser 객체 생성 및 토큰 검증
+            Jws<Claims> claimsJws = Jwts.parserBuilder()
+                .setSigningKey(key) // SecretKey를 사용하여 서명 키 설정
+                .build()            // JwtParser 객체 생성
+                .parseClaimsJws(token); // 토큰 파싱 및 검증
+            logger.info("2");
+			return true;
+		} catch(Exception e) {
+			return false;
+		}
+	}
+}
