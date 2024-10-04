@@ -1,6 +1,0 @@
-package egovframework.msa.minuk.config;
-
-public class TokenProcess {
-	@Value("{jwt.secret}")
-	private String secretKey;
-}

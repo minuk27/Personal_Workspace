@@ -1,0 +1,37 @@
+create table mail_home_table
+(
+	userID varchar(255) primary key,
+    newMail boolean,
+    sendMailCnt integer,
+    receiveMailCnt integer
+);
+
+create table send_mail_box_table
+(
+	userID varchar(255),
+	mailIndex integer,
+    date datetime,
+	receiverID varchar(255),
+    title varchar(255),
+    content text,
+    primary key (userID, mailIndex)
+);
+
+create table receive_mail_box_table
+(
+	userID varchar(255),
+	mailIndex integer,
+    date datetime,
+    senderID varchar(255),
+	readCheck boolean,
+    title varchar(255),
+    content text,
+    primary key (userID, mailIndex)
+);
+
+create table user_mailalarm_table
+(
+	userID varchar(255),
+	alarmType varchar(255),
+    message TEXT
+)

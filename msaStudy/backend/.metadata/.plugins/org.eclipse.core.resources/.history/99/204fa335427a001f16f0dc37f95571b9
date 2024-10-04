@@ -1,8 +1,0 @@
-package egovframework.msa.minuk.config;
-
-import org.springframework.beans.factory.annotation.Value;
-
-public class TokenFliter {
-	@Value("{jwt.secret}")
-	private String secretKey;
-}

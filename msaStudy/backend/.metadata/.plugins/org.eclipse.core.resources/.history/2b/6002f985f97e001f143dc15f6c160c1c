@@ -1,5 +1,0 @@
-package egovframework.msa.minuk.domain;
-
-public interface MessageRepository {
-
-}
