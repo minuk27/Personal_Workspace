@@ -1,0 +1,11 @@
+package egovframework.msa.minuk.messageDto;
+
+import lombok.Getter;
+
+@Getter
+public class MailHomeDto {
+	private String user_id;
+	private String sendMailCnt;
+	private String receiveMailCnt;
+	private boolean newMail;
+}

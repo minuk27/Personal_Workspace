@@ -1,0 +1,31 @@
+package egovframework.msa.minuk.domain;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.DynamicInsert;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@DynamicInsert
+@Entity
+@Table(name = "login_user_table")
+@Getter
+public class LoginUser {
+	@Id
+	@Column(name = "userID")
+	private String userID;
+	@Column(name = "userName")
+	private String userName;
+	
+	@Builder
+	public LoginUser(String userID, String userName) {
+		this.userID = userID;
+		this.userName = userName;
+	}
+}

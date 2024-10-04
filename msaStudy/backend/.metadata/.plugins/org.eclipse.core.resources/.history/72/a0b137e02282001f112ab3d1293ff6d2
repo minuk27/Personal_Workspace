@@ -1,0 +1,109 @@
+package egovframework.msa.minuk.service;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import egovframework.msa.minuk.client.MailServiceClient;
+import egovframework.msa.minuk.common.DirectionStatus;
+import egovframework.msa.minuk.domain.SendMailBox;
+import egovframework.msa.minuk.domain.SendMailBoxRepository;
+import egovframework.msa.minuk.domain.MailHome;
+import egovframework.msa.minuk.domain.MailHomeRepository;
+import egovframework.msa.minuk.domain.ReceiveMailBox;
+import egovframework.msa.minuk.domain.ReceiveMailBoxRepository;
+import egovframework.msa.minuk.messageDto.MailBoxId;
+import egovframework.msa.minuk.messageDto.MailHomeDto;
+import egovframework.msa.minuk.messageDto.MailListDto;
+import egovframework.msa.minuk.messageDto.ReadMailDto;
+import egovframework.msa.minuk.messageDto.SendMailDto;
+
+@Service
+public class MailService {
+	
+	@Autowired
+	private MailHomeRepository mailHomeRepository; //메일서비스의 개인 데이터
+	@Autowired
+	private SendMailBoxRepository sendMailBoxRepository; //모든 보낸 메일
+	@Autowired
+	private ReceiveMailBoxRepository receiveMailBoxRepository; //모든 받은 메일
+	
+	private final MailServiceClient mailServiceClient;
+	
+	public MailService(MailServiceClient mailServiceClient) {
+		this.mailServiceClient = mailServiceClient;
+	}
+	
+	public MailHomeDto homeData(String userID) {
+		System.out.println("서비스 함수 실행");
+		Optional<MailHome> userMailHomeData = mailHomeRepository.findById(userID);
+		
+		return new MailHomeDto(
+				userMailHomeData.get().getUserID(),
+				userMailHomeData.get().getNewMail(), 
+				userMailHomeData.get().getSendMailCnt(),
+				userMailHomeData.get().getReceiveMailCnt());
+	}
+
+	public Page<SendMailBox> sendmailList(String userID, int page, int size) {
+		Pageable pageable = PageRequest.of(page,  size);
+		return sendMailBoxRepository.findByUserID(userID, pageable);
+	}
+	
+	public List<MailListDto> receiveMailList(String userID){
+		List<ReceiveMailBox> receiveMailListDatas = receiveMailBoxRepository.findByUserID(userID);
+		return receiveMailListDatas.stream()
+								   .map(receiveMailListData -> new MailListDto(
+										   receiveMailListData.getUserID(),
+										   receiveMailListData.getMailIndex(),
+										   receiveMailListData.getDate(),
+										   receiveMailListData.getSenderID(),
+										   receiveMailListData.getTitle()))
+								   .collect(Collectors.toList());
+	}
+
+	public ReadMailDto mailData(DirectionStatus dire, String userID, int index) {
+		ReadMailDto readMailDto = null;
+		switch(dire) {
+		case SEND:
+			SendMailBox sendMailData = sendMailBoxRepository.findById(new MailBoxId(userID, index)).orElseThrow(() -> new RuntimeException("메일이 존재하지 않습니다."));
+			readMailDto = new ReadMailDto(sendMailData.getReceiverID(), sendMailData.getTitle(), sendMailData.getContent());
+			break;
+		case RECEIVE:
+			ReceiveMailBox receiveMailData = receiveMailBoxRepository.findById(new MailBoxId(userID, index)).orElseThrow(() -> new RuntimeException("메일이 존재하지 않습니다."));
+			readMailDto = new ReadMailDto(receiveMailData.getSenderID(), receiveMailData.getTitle(), receiveMailData.getContent());
+			break;
+		}
+		return readMailDto;
+	}
+
+	public boolean mailSend(SendMailDto sendMailData, String userID) {
+		String sender = sendMailData.getSender();
+		String recipient = sendMailData.getRecipient();
+		String title = sendMailData.getTitle();
+		String content = sendMailData.getContent();
+		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		
+		if(mailServiceClient.getJoinUserStatus(userID)) {
+			int smailIndex = sendMailBoxRepository.countByUserID(userID) + 1;
+			SendMailBox newSendMail = SendMailBox.builder().userID(sender).mailIndex(smailIndex).receiverID(recipient).date(LocalDateTime.now().format(formatter)).title(title).content(content).build();
+			sendMailBoxRepository.save(newSendMail);
+			int rmailIndex = receiveMailBoxRepository.countByUserID(userID) + 1;
+			ReceiveMailBox newReceiveMail = ReceiveMailBox.builder().userID(sender).mailIndex(rmailIndex).date(LocalDateTime.now().format(formatter)).title(title).content(content).build();
+			receiveMailBoxRepository.save(newReceiveMail);
+			
+			return mailServiceClient.setUserAlarm(userID); //false면 알림 전송 실패
+		}
+		
+		return false; //없음
+	}
+}

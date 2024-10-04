@@ -1,0 +1,32 @@
+package egovframework.msa.minuk.messageDto;
+
+import java.io.Serializable;
+import java.util.Objects;
+
+import lombok.Getter;
+
+@Getter
+public class MailBoxId implements Serializable {
+    private String userId;
+    private int mailIndex;
+
+    public MailBoxId() {}
+
+    public MailBoxId(String userId, int mailIndex) {
+        this.userId = userId;
+        this.mailIndex = mailIndex;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MailBoxId)) return false;
+        MailBoxId that = (MailBoxId) o;
+        return mailIndex == that.mailIndex && Objects.equals(userId, that.userId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, mailIndex);
+    }
+}

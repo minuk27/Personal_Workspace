@@ -1,0 +1,44 @@
+package egovframework.msa.minuk.domain;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.DynamicInsert;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@DynamicInsert
+@Entity
+@Table(name = "mail_box_table")
+@Getter
+public class MailBox {
+	@Column(name = "userID")
+	String userID;
+	@Column(name = "mailIndex")
+	int mailIndex;
+	@Column(name = "senderID")
+	String senderID;
+	@Column(name = "receiverID")
+	String receiverID;
+	@Column(name = "readCheck")
+	boolean readCheck;
+	@Column(name = "title")
+	String title;
+	@Column(name = "content")
+	String content;
+	
+	@Builder
+	public MailBox(String userID, int mailIndex, String senderID, String receiverID, boolean readCheck, String title, String content) {
+		this.userID = userID;
+		this.mailIndex = mailIndex;
+		this.senderID = senderID;
+		this.receiverID = receiverID;
+		this.readCheck = readCheck;
+		this.title = title;
+		this.content = content;
+	}
+}

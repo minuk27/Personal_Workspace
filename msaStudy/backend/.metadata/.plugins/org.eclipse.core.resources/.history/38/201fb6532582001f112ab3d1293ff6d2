@@ -1,0 +1,5 @@
+package egovframework.msa.minuk.domain;
+
+public class UserMailHome {
+
+}

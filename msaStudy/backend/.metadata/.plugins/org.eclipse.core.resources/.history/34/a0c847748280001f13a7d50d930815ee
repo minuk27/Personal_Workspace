@@ -1,0 +1,11 @@
+package egovframework.msa.minuk.domain;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import egovframework.msa.minuk.messageDto.MailBoxId;
+
+public interface MailBoxRepository extends JpaRepository<MailBox, MailBoxId>  {
+	List<MailBox> findByUserId(String id);
+}

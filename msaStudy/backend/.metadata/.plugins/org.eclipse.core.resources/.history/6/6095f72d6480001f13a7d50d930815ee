@@ -1,0 +1,33 @@
+package egovframework.msa.minuk.messageDto;
+
+public class MailBoxId implements Serializable {
+    private String userId;
+    public class MailBoxId implements Serializable {
+        private String userId;
+        private String mailId;
+
+        // 기본 생성자
+        public MailBoxId() {}
+
+        // 생성자
+        public MailBoxId(String userId, String mailId) {
+            this.userId = userId;
+            this.mailId = mailId;
+        }
+
+        // equals() 및 hashCode() 메서드 오버라이드
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof MailBoxId)) return false;
+            MailBoxId that = (MailBoxId) o;
+            return Objects.equals(userId, that.userId) &&
+                   Objects.equals(mailId, that.mailId);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(userId, mailId);
+        }
+    }
+}

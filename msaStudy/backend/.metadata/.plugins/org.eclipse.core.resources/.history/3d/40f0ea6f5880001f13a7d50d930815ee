@@ -1,0 +1,11 @@
+package egovframework.msa.minuk.messageDto;
+
+import lombok.Getter;
+
+@Getter
+public class TrashMailDto {
+	String stats;
+	String from;
+	String title;
+	String content;
+}

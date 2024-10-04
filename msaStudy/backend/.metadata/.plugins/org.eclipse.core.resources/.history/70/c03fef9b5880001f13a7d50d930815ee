@@ -1,0 +1,65 @@
+package egovframework.msa.minuk.control;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import egovframework.msa.minuk.common.DirectionStatus;
+import egovframework.msa.minuk.messageDto.MailHomeDto;
+import egovframework.msa.minuk.messageDto.MailList;
+import egovframework.msa.minuk.messageDto.ReadMailDto;
+import egovframework.msa.minuk.service.MailService;
+
+@RestController
+@RequestMapping("/mailService")
+public class MailController {
+	
+	private MailService mailService;
+	private DirectionStatus dirStatus;
+	
+	@GetMapping("/mailHome")
+	public ResponseEntity<List<MailHomeDto>> mailHome(){
+		List<MailHomeDto> mailHomeData = new ArrayList<>();
+		mailHomeData = mailService.homeData();
+		return ResponseEntity.ok(mailHomeData);
+	}
+	
+	@GetMapping("/sendMailBox")
+	public ResponseEntity<List<List<MailList>>> sendMailBox(){
+		List<List<MailList>> mailListData = new ArrayList<>();
+		mailListData = mailService.mailList(dirStatus.SEND);
+		return ResponseEntity.ok(mailListData);
+	}
+	
+	@PostMapping("/sendMailBox/readMail")
+	public ResponseEntity<List<ReadMailDto>> sendMailRead(@RequestBody int index){
+		List<ReadMailDto> mailSendData = new ArrayList<>();
+		mailSendData = mailService.mailData(dirStatus.SEND, index);
+		return ResponseEntity.ok(mailSendData);
+	}
+	
+	@GetMapping("/receiveMailBox")
+	public ResponseEntity<List<List<MailList>>> receiveMailBox(){
+		List<List<MailList>> mailListData = new ArrayList<>();
+		mailListData = mailService.mailList(dirStatus.RECEIVE);
+		return ResponseEntity.ok(mailListData);
+	}
+	
+	@PostMapping("/receiveMailBox/readMail")
+	public ResponseEntity<ReadMailDto> receiveMailRead(){
+		List<ReadMailDto> mailSendData = new ArrayList<>();
+		mailSendData = mailService.mailData(dirStatus.SEND, index);
+		return ResponseEntity.ok(mailSendData);
+	}
+	
+	@GetMapping("wasteBasketBox")
+	public ResponseEntity<List<>> wasteBasketBox(){
+		
+	}
+}

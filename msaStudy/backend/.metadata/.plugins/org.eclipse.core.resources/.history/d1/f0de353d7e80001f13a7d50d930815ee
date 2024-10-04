@@ -1,0 +1,14 @@
+package egovframework.msa.minuk.messageDto;
+
+import lombok.Getter;
+
+@Getter
+public class MailListDto {
+	String date;
+	String from;
+	String title;
+	
+	public MailListDto(String date, String from, String title) {
+		
+	}
+}

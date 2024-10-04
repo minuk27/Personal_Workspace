@@ -1,0 +1,42 @@
+package egovframework.msa.minuk.domain;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.DynamicInsert;
+
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@DynamicInsert
+@Entity
+@Table(name = "mail_home_table")
+public class UserMailHome {
+	@Id
+	@Column(name = "userID")
+	private String userID;
+	@Column(name = "newMail")
+	private boolean newMail;
+	@Column(name = "sendMailCnt")
+	private int sendMailCnt;
+	@Column(name = "receiveMailCnt")
+	private int receiveMailCnt;
+	
+	@Builder
+	public User(String name, String id, String password) {
+		this.name = name;
+		this.userID = id;
+		this.password = password;
+	}
+	
+	public String getID() {
+		return this.userID;
+	}
+	
+	public String getPasswrod() {
+		return this.password;
+	}
+}

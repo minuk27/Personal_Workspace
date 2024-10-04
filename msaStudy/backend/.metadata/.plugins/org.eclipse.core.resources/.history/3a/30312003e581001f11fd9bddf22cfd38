@@ -1,0 +1,10 @@
+package egovframework.msa.minuk.messageDto;
+
+import lombok.Getter;
+
+@Getter
+public class ReadMailDto {
+	String from;
+	String title;
+	String content;
+}

@@ -1,0 +1,38 @@
+package egovframework.msa.minuk.domain;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.DynamicInsert;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@DynamicInsert
+@Entity
+@Table(name = "mail_home_table")
+@Getter
+public class MailHome {
+	@Column(name = "user_id")
+	String user_id;
+	@Column(name = "newMail")
+	boolean newMail;
+	@Column(name = "sendMailCnt")
+	String sendMailCnt;
+	@Column(name = "receiveMailCnt")
+	String receiveMailCnt;
+	
+	@Builder
+	public MailHome(String user_id, int mail_count, String sender_id, String title, String content, String send_date, String status) {
+		this.user_id = user_id;
+		this.mail_count = mail_count;
+		this.sender_id = sender_id;
+		this.title = title;
+		this.content = content;
+		this.send_date = send_date;
+		this.status = status;
+	}
+}

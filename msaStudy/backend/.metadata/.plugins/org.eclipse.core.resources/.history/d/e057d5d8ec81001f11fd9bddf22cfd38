@@ -1,0 +1,107 @@
+package egovframework.msa.minuk.service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import egovframework.msa.minuk.client.MailServiceClient;
+import egovframework.msa.minuk.common.DirectionStatus;
+import egovframework.msa.minuk.domain.SendMailBox;
+import egovframework.msa.minuk.domain.SendMailBoxRepository;
+import egovframework.msa.minuk.domain.MailHome;
+import egovframework.msa.minuk.domain.MailHomeRepository;
+import egovframework.msa.minuk.domain.ReceiveMailBox;
+import egovframework.msa.minuk.domain.ReceiveMailBoxRepository;
+import egovframework.msa.minuk.messageDto.MailBoxId;
+import egovframework.msa.minuk.messageDto.MailHomeDto;
+import egovframework.msa.minuk.messageDto.MailListDto;
+import egovframework.msa.minuk.messageDto.ReadMailDto;
+import egovframework.msa.minuk.messageDto.SendMailDto;
+
+@Service
+public class MailService {
+	
+	@Autowired
+	private MailHomeRepository mailHomeRepository; //메일서비스의 개인 데이터
+	@Autowired
+	private SendMailBoxRepository sendMailBoxRepository; //모든 보낸 메일
+	@Autowired
+	private ReceiveMailBoxRepository receiveMailBoxRepository; //모든 받은 메일
+	
+	private final MailServiceClient mailServiceClient;
+	
+	public MailService(MailServiceClient mailServiceClient) {
+		this.mailServiceClient = mailServiceClient;
+	}
+	
+	public MailHomeDto homeData(String userId) {
+		Optional<MailHome> userMailHomeData = mailHomeRepository.findById(userId);
+		
+		return new MailHomeDto(
+				userMailHomeData.get().getUserID(),
+				userMailHomeData.get().getNewMail(), 
+				userMailHomeData.get().getSendMailCnt(),
+				userMailHomeData.get().getReceiveMailCnt());
+	}
+
+	public List<MailListDto> sendmailList(String userId) {
+		List<SendMailBox> sendMailListDatas = sendMailBoxRepository.findByUserId(userId);
+		return sendMailListDatas.stream()
+							   .map(sendMailListData -> new MailListDto(
+									   sendMailListData.getUserID(),
+									   sendMailListData.getMailIndex(),
+									   sendMailListData.getDate(),
+									   sendMailListData.getReceiverID(),
+									   sendMailListData.getTitle()))
+							   .collect(Collectors.toList());
+	}
+	
+	public List<MailListDto> receiveMailList(String userId){
+		List<ReceiveMailBox> receiveMailListDatas = receiveMailBoxRepository.findByUserId(userId);
+		return receiveMailListDatas.stream()
+								   .map(receiveMailListData -> new MailListDto(
+										   receiveMailListData.getUserID(),
+										   receiveMailListData.getMailIndex(),
+										   receiveMailListData.getDate(),
+										   receiveMailListData.getSenderID(),
+										   receiveMailListData.getTitle()))
+								   .collect(Collectors.toList());
+	}
+
+	public ReadMailDto mailData(DirectionStatus dire, String userId, int index) {
+		ReadMailDto readMailDto = null;
+		switch(dire) {
+		case SEND:
+			SendMailBox sendMailData = sendMailBoxRepository.findById(new MailBoxId(userId, index)).orElseThrow(() -> new RuntimeException("메일이 존재하지 않습니다."));
+			readMailDto = new ReadMailDto(sendMailData.getReceiverID(), sendMailData.getTitle(), sendMailData.getContent());
+			break;
+		case RECEIVE:
+			ReceiveMailBox receiveMailData = receiveMailBoxRepository.findById(new MailBoxId(userId, index)).orElseThrow(() -> new RuntimeException("메일이 존재하지 않습니다."));
+			readMailDto = new ReadMailDto(receiveMailData.getSenderID(), receiveMailData.getTitle(), receiveMailData.getContent());
+			break;
+		}
+		return readMailDto;
+	}
+
+	public boolean mailSend(SendMailDto sendMailData, String userId) {
+		String sender = sendMailData.getSender();
+		String recipient = sendMailData.getRecipient();
+		String title = sendMailData.getTitle();
+		String content = sendMailData.getContent();
+		
+		if(mailServiceClient.getJoinUserStatus(userId)) {
+			SendMailBox newSendMail = SendMailBox.builder().userID(userId).mailIndex(0).title(title).content(content).build();
+			sendMailBoxRepository.save(newSendMail);
+			
+			ReceiveMailBox newReceiveMail = ReceiveMailBox.builder().userID(userId).mailIndex(0).title(title).content(content).build();
+			receiveMailBoxRepository.save(newReceiveMail);
+			
+			return mailServiceClient.setUserAlarm(userId); //false면 알림 전송 실패
+		}
+		
+		return false; //없음
+	}
+}

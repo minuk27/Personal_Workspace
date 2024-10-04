@@ -1,0 +1,9 @@
+package egovframework.msa.minuk.domain;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import egovframework.msa.minuk.messageDto.MailBoxId;
+
+public interface ReceiveMailBoxRepository extends JpaRepository<ReceiveMailBox, MailBoxId> {
+
+}

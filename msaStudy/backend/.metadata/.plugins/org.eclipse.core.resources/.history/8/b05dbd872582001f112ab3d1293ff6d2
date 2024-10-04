@@ -1,0 +1,16 @@
+package egovframework.msa.minuk.domain;
+
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.DynamicInsert;
+
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@DynamicInsert
+@Entity
+@Table(name = "mail_home_table")
+public class UserMailHome {
+	
+}

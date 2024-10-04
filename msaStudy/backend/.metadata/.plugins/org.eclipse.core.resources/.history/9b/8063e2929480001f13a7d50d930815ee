@@ -1,0 +1,9 @@
+package egovframework.msa.minuk.client;
+
+import org.springframework.cloud.openfeign.FeignClient;
+
+@FeignClient(name = "user-service")
+public class LoginSearchClient {
+	@GetMapping("/userService/LoginStatus/{userId}")
+	boolean getLoginStatus()
+}
